@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Biografia TNinfo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Roboto+Serif:wght@400;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Lato:wght@400;700&family=Montserrat:wght@400;600&family=Merriweather:wght@400;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* Estilos básicos para o corpo e layout */
+        body {
+            font-family: 'Inter', sans-serif; /* Fonte padrão */
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Variáveis CSS para modo claro/escuro */
+        :root {
+            --bg-color-light: #f3f4f6; /* Gray 100 */
+            --text-color-light: #1f2937; /* Gray 900 */
+            --card-bg-light: #ffffff;
+            --border-color-light: #e5e7eb; /* Gray 200 */
+            --link-solid-bg-light: #1f2937; /* Gray 900 */
+            --link-solid-text-light: #ffffff;
+            --link-outline-border-light: #1f2937; /* Gray 900 */
+            --link-outline-text-light: #1f2937; /* Gray 900 */
+        }
+
+        /* Modo Escuro */
+        body.dark-mode {
+            --bg-color-light: #1f2937; /* Gray 900 */
+            --text-color-light: #f3f4f6; /* Gray 100 */
+            --card-bg-light: #111827; /* Gray 900 */
+            --border-color-light: #374151; /* Gray 700 */
+            --link-solid-bg-light: #f3f4f6; /* Gray 100 */
+            --link-solid-text-light: #1f2937; /* Gray 900 */
+            --link-outline-border-light: #f3f4f6; /* Gray 100 */
+            --link-outline-text-light: #f3f4f6; /* Gray 100 */
+        }
+
+        /* Aplicando as variáveis */
+        body {
+            background-color: var(--bg-color-light);
+            color: var(--text-color-light);
+        }
+
+        .card {
+            background-color: var(--card-bg-light);
+            border-color: var(--border-color-light);
+        }
+
+        .link-button {
+            /* Estilos base para botões de link */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 0.75rem;
+            text-decoration: none;
+            font-weight: 600;
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .link-button:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Estilos específicos para tipos de botão */
+        .link-button.solid {
+            background-color: var(--link-solid-bg-light);
+            color: var(--link-solid-text-light);
+        }
+
+        .link-button.outline {
+            border: 2px solid var(--link-outline-border-light);
+            color: var(--link-outline-text-light);
+            background-color: transparent;
+        }
+
+        .link-button.gradient {
+            /* O gradiente será aplicado via JS/inline style */
+            color: var(--link-solid-text-light); /* Cor do texto padrão para gradiente */
+        }
+
+        .link-button.image {
+            /* Botão de imagem - a imagem substitui o botão */
+            padding: 0; /* Remove padding para a imagem ocupar todo o espaço */
+        }
+
+        .link-button.image img {
+            display: block;
+            width: 100%;
+            height: auto;
+            border-radius: 0.5rem; /* Mantém o border-radius */
+        }
+
+        /* Estilos para a pré-visualização */
+        #preview-area {
+            background-size: cover;
+            background-position: center;
+            min-height: 100vh; /* Garante que a pré-visualização ocupe a altura total */
+            padding: 2rem 1rem;
+            display: flex;
+            justify-content: center; /* Centraliza o conteúdo horizontalmente */
+            align-items: flex-start; /* Alinha o conteúdo no topo */
+            /* overflow-y: auto; REMOVIDO daqui */
+        }
+
+        /* Estilo para o frame do smartphone */
+        #smartphone-frame {
+            width: 375px; /* Largura típica de um smartphone */
+            height: 667px; /* Altura típica de um smartphone */
+            border: 16px solid #333; /* Borda para simular a moldura */
+            border-radius: 36px; /* Bordas arredondadas do celular */
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5); /* Sombra para dar profundidade */
+            overflow: hidden; /* Esconde o conteúdo que transborda para fora do frame */
+            position: relative; /* Para posicionar elementos internos se necessário */
+            background-color: white; /* Fundo branco padrão para o conteúdo interno */
+            display: flex; /* Usa flexbox para o conteúdo interno */
+            flex-direction: column; /* Organiza os itens em coluna */
+        }
+
+         /* Ajuste para o modo escuro no frame do smartphone */
+        body.dark-mode #smartphone-frame {
+             background-color: var(--card-bg-light); /* Usa a cor de fundo do card no modo escuro */
+        }
+
+
+        #preview-content {
+            width: 100%;
+            max-width: 100%; /* Permite que o conteúdo ocupe a largura total do frame */
+            text-align: center;
+            padding: 1rem; /* Adiciona um padding interno para o conteúdo */
+            box-sizing: border-box; /* Inclui padding na largura total */
+            overflow-y: auto; /* ADICIONADO AQUI: Adiciona scroll vertical quando o conteúdo exceder a altura */
+            flex-grow: 1; /* Permite que o conteúdo ocupe o espaço restante no flex container */
+        }
+
+        #preview-profile-image {
+            width: 96px; /* w-24 */
+            height: 96px; /* h-24 */
+            object-fit: cover;
+            border-radius: 9999px; /* rounded-full */
+            margin: 0 auto 1rem auto; /* mx-auto mb-4 */
+        }
+
+        #preview-username {
+            font-size: 1.5rem; /* text-2xl */
+            font-weight: 600; /* font-semibold */
+            margin-bottom: 0.5rem; /* mb-2 */
+            /* A cor será definida via JS */
+        }
+
+        #preview-bio {
+            font-size: 1rem; /* text-base */
+            margin-bottom: 1.5rem; /* mb-6 */
+            /* A cor será definida via JS */
+        }
+
+        /* Estilos para o painel de controle */
+        #control-panel {
+            max-height: 100vh;
+            overflow-y: auto; /* Adiciona scroll se o conteúdo for muito longo */
+            padding: 1rem;
+        }
+
+        /* Estilos para os campos de link */
+        .link-item {
+            border: 1px solid var(--border-color-light);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background-color: var(--card-bg-light);
+        }
+
+        .link-item input, .link-item select {
+            margin-bottom: 0.75rem;
+            padding: 0.5rem;
+            border: 1px solid var(--border-color-light);
+            border-radius: 0.25rem;
+            width: 100%;
+            background-color: var(--bg-color-light); /* Fundo dos inputs */
+            color: var(--text-color-light); /* Cor do texto dos inputs */
+        }
+
+        .link-item button {
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+        }
+
+        /* O estilo .remove-link no painel não será mais usado, mas mantido por segurança */
+        .link-item .remove-link {
+            background-color: #ef4444; /* Red 500 */
+            color: white;
+            border: none;
+            display: none; /* Esconde o botão de remover no painel */
+        }
+
+        .link-item .remove-link:hover {
+            background-color: #dc2626; /* Red 600 */
+        }
+
+        .link-item .edit-link {
+            background-color: #3b82f6; /* Blue 500 */
+            color: white;
+            border: none;
+            margin-right: 0.5rem;
+        }
+
+        .link-item .edit-link:hover {
+            background-color: #2563eb; /* Blue 600 */
+        }
+
+         /* Estilos para o modal de edição de link */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            visibility: hidden;
+            opacity: 0;
+            transition: visibility 0s, opacity 0.3s;
+        }
+
+        .modal.show {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background-color: var(--card-bg-light);
+            padding: 2rem;
+            border-radius: 0.5rem;
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+        }
+
+        .modal-content input, .modal-content select {
+             margin-bottom: 1rem;
+            padding: 0.5rem;
+            border: 1px solid var(--border-color-light);
+            border-radius: 0.25rem;
+            width: 100%;
+            background-color: var(--bg-color-light);
+            color: var(--text-color-light);
+        }
+
+        .modal-content button {
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+        }
+
+        .modal-content .close-modal {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            background: none;
+            border: none;
+            color: var(--text-color-light);
+        }
+
+        .modal-content .save-link {
+            background-color: #22c55e; /* Green 500 */
+            color: white;
+            border: none;
+            margin-right: 0.5rem; /* Adiciona margem à direita para separar do novo botão */
+        }
+
+        .modal-content .save-link:hover {
+            background-color: #16a34a; /* Green 600 */
+        }
+
+        /* Estilo para o novo botão Remover no modal */
+        .modal-content .remove-link-modal {
+            background-color: #ef4444; /* Red 500 */
+            color: white;
+            border: none;
+        }
+
+        .modal-content .remove-link-modal:hover {
+            background-color: #dc2626; /* Red 600 */
+        }
+
+
+        /* Responsividade */
+        @media (min-width: 768px) {
+            #app-container {
+                display: flex;
+            }
+            #control-panel {
+                width: 40%; /* Painel de controle ocupa 40% */
+                flex-shrink: 0; /* Não encolhe */
+            }
+            #preview-area {
+                flex-grow: 1; /* Pré-visualização ocupa o restante */
+                align-items: center; /* Centraliza o frame do smartphone verticalmente em telas maiores */
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-900">
+
+    <div id="app-container" class="md:flex">
+        <div id="control-panel" class="w-full md:w-2/5 bg-white p-4 shadow-md rounded-lg card">
+            <h1 class="text-2xl font-bold mb-4">Gerador de Biografia TNinfo</h1>
+
+            <div class="mb-6">
+                <h2 class="text-xl font-semibold mb-2">Informações Pessoais</h2>
+                <div class="mb-4">
+                    <label for="username" class="block text-sm font-medium text-gray-700 dark:text-gray-300">@username:</label>
+                    <input type="text" id="username" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 card" placeholder="seu-nome-de-usuario">
+                </div>
+                <div class="mb-4">
+                    <label for="username-color" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Cor do @username:</label>
+                    <input type="color" id="username-color" value="#1f2937" class="mt-1 block">
+                </div>
+                <div class="mb-4">
+                    <label for="bio" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Bio:</label>
+                    <textarea id="bio" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 card" placeholder="Uma breve descrição sobre você..."></textarea>
+                </div>
+                 <div class="mb-4">
+                    <label for="bio-color" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Cor da Bio:</label>
+                    <input type="color" id="bio-color" value="#4b5563" class="mt-1 block"> </div>
+            </div>
+
+            <div class="mb-6">
+                <h2 class="text-xl font-semibold mb-2">Personalização Visual</h2>
+                <div class="mb-4">
+                    <label for="profile-image" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Imagem de Perfil:</label>
+                    <input type="file" id="profile-image" accept="image/*" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Fundo:</label>
+                    <div class="mt-1 flex items-center space-x-4">
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="background-type" value="image" checked class="form-radio">
+                            <span class="ml-2 text-gray-700 dark:text-gray-300">Imagem</span>
+                        </label>
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="background-type" value="gradient" class="form-radio">
+                            <span class="ml-2 text-gray-700 dark:text-gray-300">Gradiente</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div id="background-image-options" class="mb-4">
+                     <label for="background-image" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Imagem de Fundo:</label>
+                    <input type="file" id="background-image" accept="image/*" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                </div>
+
+                 <div id="background-gradient-options" class="mb-4 hidden">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Cores do Gradiente:</label>
+                    <div class="flex space-x-4 mt-1">
+                        <div>
+                            <label for="gradient-color-1" class="block text-xs font-medium text-gray-500 dark:text-gray-400">Cor 1:</label>
+                            <input type="color" id="gradient-color-1" value="#4f46e5" class="mt-1">
+                        </div>
+                        <div>
+                             <label for="gradient-color-2" class="block text-xs font-medium text-gray-500 dark:text-gray-400">Cor 2:</label>
+                            <input type="color" id="gradient-color-2" value="#e879f9" class="mt-1">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label for="text-font" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Fonte do Texto:</label>
+                    <select id="text-font" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 card">
+                        <option value="Inter, sans-serif">Sans (Inter)</option>
+                        <option value="Roboto Serif, serif">Serif (Roboto Serif)</option>
+                        <option value="Space Mono, monospace">Monospace (Space Mono)</option>
+                        <option value="Open Sans, sans-serif">Sans (Open Sans)</option>
+                        <option value="Lato, sans-serif">Sans (Lato)</option>
+                        <option value="Montserrat, sans-serif">Sans (Montserrat)</option>
+                        <option value="Merriweather, serif">Serif (Merriweather)</option>
+                        <option value="Playfair Display, serif">Serif (Playfair Display)</option>
+                    </select>
+                </div>
+                 <div class="flex items-center mb-4">
+                    <input type="checkbox" id="dark-mode-toggle" class="form-checkbox h-5 w-5 text-blue-600">
+                    <label for="dark-mode-toggle" class="ml-2 block text-sm font-medium text-gray-900 dark:text-gray-100">Modo Escuro</label>
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <h2 class="text-xl font-semibold mb-2">Links</h2>
+                <div id="links-list">
+                    </div>
+                <button id="add-link-btn" class="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600">Adicionar Link</button>
+            </div>
+
+            <div class="mb-6">
+                <h2 class="text-xl font-semibold mb-2">Gerar Link</h2>
+                 <div class="mb-4">
+                    <label for="custom-link-input" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Link Personalizado (ex: sua-bio-unica):</label>
+                    <input type="text" id="custom-link-input" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 card" placeholder="seu-link-personalizado">
+                </div>
+                <button id="generate-link-btn" class="w-full bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600">Gerar e Salvar Bio</button>
+                <div id="generated-link-area" class="mt-4 hidden">
+                    <label for="generated-link" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Seu Link:</label>
+                    <input type="text" id="generated-link" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm card" readonly>
+                    <button id="copy-link-btn" class="mt-2 w-full bg-gray-200 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-300">Copiar Link</button>
+                     <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Nota: O link salva sua bio no seu navegador. Para compartilhar com outros, você precisaria hospedar esta página e garantir que o script carregue a bio usando o hash da URL.</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="preview-area" class="flex-1 p-4">
+            <div id="smartphone-frame">
+                <div id="preview-content">
+                    <img id="preview-profile-image" src="https://placehold.co/96x96/cccccc/ffffff?text=Foto" alt="Imagem de Perfil">
+                    <h2 id="preview-username" class="text-2xl font-semibold">@seu_usuario</h2>
+                    <p id="preview-bio" class="text-base">Sua biografia aparecerá aqui.</p>
+                    <div id="preview-links">
+                        </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="link-modal" class="modal">
+        <div class="modal-content">
+            <button class="close-modal">&times;</button>
+            <h2 class="text-xl font-semibold mb-4">Editar Link</h2>
+            <input type="hidden" id="modal-link-index">
+            <div class="mb-4">
+                <label for="modal-link-name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nome do Link:</label>
+                <input type="text" id="modal-link-name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm card">
+            </div>
+            <div class="mb-4">
+                <label for="modal-link-url" class="block text-sm font-medium text-gray-700 dark:text-gray-300">URL:</label>
+                <input type="url" id="modal-link-url" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm card">
+            </div>
+             <div class="mb-4">
+                <label for="modal-link-icon" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Ícone/Emoji (Opcional):</label>
+                <input type="text" id="modal-link-icon" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm card" placeholder="Ex: ✨ ou fas fa-heart">
+            </div>
+            <div class="mb-4">
+                <label for="modal-link-style" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Estilo do Botão:</label>
+                <select id="modal-link-style" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm card">
+                    <option value="solid">Sólido</option>
+                    <option value="outline">Borda</option>
+                    <option value="gradient">Gradiente</option>
+                    <option value="image">Imagem Personalizada</option>
+                </select>
+            </div>
+             <div id="modal-link-gradient-options" class="mb-4 hidden">
+                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Cores do Gradiente:</label>
+                <div class="flex space-x-4 mt-1">
+                    <div>
+                        <label for="modal-gradient-color-1" class="block text-xs font-medium text-gray-500 dark:text-gray-400">Cor 1:</label>
+                        <input type="color" id="modal-gradient-color-1" value="#4f46e5" class="mt-1">
+                    </div>
+                    <div>
+                         <label for="modal-gradient-color-2" class="block text-xs font-medium text-gray-500 dark:text-gray-400">Cor 2:</label>
+                        <input type="color" id="modal-gradient-color-2" value="#e879f9" class="mt-1">
+                    </div>
+                </div>
+            </div>
+             <div id="modal-link-image-options" class="mb-4 hidden">
+                 <label for="modal-link-image" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Imagem do Botão:</label>
+                <input type="file" id="modal-link-image" accept="image/*" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                 <img id="modal-link-image-preview" src="" alt="Pré-visualização da Imagem do Botão" class="mt-2 max-h-32 hidden">
+                 <input type="hidden" id="modal-link-image-dataurl"> </div>
+
+            <div class="flex justify-end mt-4">
+                <button id="remove-link-modal-btn" class="remove-link-modal mr-2">Remover Link</button> <button id="save-link-btn" class="save-link">Salvar Link</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        // Seleciona os elementos do DOM
+        const usernameInput = document.getElementById('username');
+        const usernameColorInput = document.getElementById('username-color');
+        const bioTextarea = document.getElementById('bio');
+        const bioColorInput = document.getElementById('bio-color');
+        const profileImageInput = document.getElementById('profile-image');
+        const backgroundImageInput = document.getElementById('background-image');
+        const backgroundTypeRadios = document.querySelectorAll('input[name="background-type"]');
+        const backgroundImageOptions = document.getElementById('background-image-options');
+        const backgroundGradientOptions = document.getElementById('background-gradient-options');
+        const gradientColor1Input = document.getElementById('gradient-color-1');
+        const gradientColor2Input = document.getElementById('gradient-color-2');
+        const textFontSelect = document.getElementById('text-font');
+
+        const darkModeToggle = document.getElementById('dark-mode-toggle');
+        const linksListDiv = document.getElementById('links-list');
+        const addLinkBtn = document.getElementById('add-link-btn');
+        const customLinkInput = document.getElementById('custom-link-input'); // Novo elemento
+        const generateLinkBtn = document.getElementById('generate-link-btn');
+        const generatedLinkArea = document.getElementById('generated-link-area');
+        const generatedLinkInput = document.getElementById('generated-link');
+        const copyLinkBtn = document.getElementById('copy-link-btn');
+
+        const previewArea = document.getElementById('preview-area');
+        const smartphoneFrame = document.getElementById('smartphone-frame');
+        const previewContent = document.getElementById('preview-content');
+        const previewProfileImage = document.getElementById('preview-profile-image');
+        const previewUsername = document.getElementById('preview-username');
+        const previewBio = document.getElementById('preview-bio');
+        const previewLinksDiv = document.getElementById('preview-links');
+
+        const linkModal = document.getElementById('link-modal');
+        const closeModalBtn = document.querySelector('.close-modal');
+        const modalLinkIndexInput = document.getElementById('modal-link-index');
+        const modalLinkNameInput = document.getElementById('modal-link-name');
+        const modalLinkUrlInput = document.getElementById('modal-link-url');
+        const modalLinkIconInput = document.getElementById('modal-link-icon');
+        const modalLinkStyleSelect = document.getElementById('modal-link-style');
+        const modalLinkGradientOptions = document.getElementById('modal-link-gradient-options');
+        const modalGradientColor1Input = document.getElementById('modal-gradient-color-1');
+        const modalGradientColor2Input = document.getElementById('modal-gradient-color-2');
+        const modalLinkImageOptions = document.getElementById('modal-link-image-options');
+        const modalLinkImageInput = document.getElementById('modal-link-image');
+        const modalLinkImagePreview = document.getElementById('modal-link-image-preview');
+        const modalLinkImageDataUrlInput = document.getElementById('modal-link-image-dataurl');
+        const saveLinkBtn = document.getElementById('save-link-btn');
+        const removeLinkModalBtn = document.getElementById('remove-link-modal-btn');
+
+        // Array para armazenar os links
+        let links = [];
+
+        // Função para atualizar a pré-visualização
+        function updatePreview() {
+            // Atualiza informações pessoais
+            previewUsername.textContent = '@' + (usernameInput.value || 'seu_usuario');
+            previewBio.textContent = bioTextarea.value || 'Sua biografia aparecerá aqui.';
+
+            // Atualiza cor do username e bio
+            previewUsername.style.color = usernameColorInput.value;
+            previewBio.style.color = bioColorInput.value;
+
+            // Atualiza fonte do texto geral (aplicado ao preview-content)
+            previewContent.style.fontFamily = textFontSelect.value;
+
+            // Atualiza imagem de perfil
+            if (profileImageInput.files && profileImageInput.files[0]) {
+                 // Se houver um arquivo selecionado, o src já estará definido pelo FileReader
+            } else if (!previewProfileImage.src || previewProfileImage.src.includes('placehold.co')) {
+                 // Se não houver arquivo e o src for vazio ou placeholder, mantém o placeholder
+                 previewProfileImage.src = 'https://placehold.co/96x96/cccccc/ffffff?text=Foto';
+            }
+             // Se houver um src definido que não seja placeholder e não haja novo arquivo, mantém o src existente
+
+            // Atualiza fundo
+            const selectedBackgroundType = document.querySelector('input[name="background-type"]:checked').value;
+            if (selectedBackgroundType === 'image') {
+                // A imagem de fundo será definida pelo file reader no evento change
+                smartphoneFrame.style.backgroundImage = smartphoneFrame.dataset.backgroundImageUrl ? `url(${smartphoneFrame.dataset.backgroundImageUrl})` : 'none';
+                smartphoneFrame.style.backgroundColor = ''; // Remove cor de fundo se houver
+            } else if (selectedBackgroundType === 'gradient') {
+                const color1 = gradientColor1Input.value;
+                const color2 = gradientColor2Input.value;
+                smartphoneFrame.style.backgroundImage = `linear-gradient(to bottom right, ${color1}, ${color2})`;
+                 smartphoneFrame.style.backgroundColor = ''; // Remove cor de fundo se houver
+            }
+
+            // Atualiza links
+            previewLinksDiv.innerHTML = ''; // Limpa os links existentes
+            links.forEach((link, index) => {
+                const linkElement = document.createElement('a');
+                linkElement.href = link.url || '#'; // Usa # se a URL estiver vazia
+                linkElement.target = '_blank'; // Abre em nova aba
+                linkElement.classList.add('link-button', link.style);
+
+                // Aplica estilos específicos para gradiente
+                if (link.style === 'gradient') {
+                    const gradColor1 = link.gradientColor1 || '#4f46e5';
+                    const gradColor2 = link.gradientColor2 || '#e879f9';
+                    linkElement.style.backgroundImage = `linear-gradient(to right, ${gradColor1}, ${gradColor2})`;
+                    linkElement.style.color = 'white'; // Cor do texto padrão para gradiente
+                } else if (link.style === 'image' && link.imageDataUrl) {
+                     // Se for estilo imagem e tiver Data URL da imagem
+                     const imgElement = document.createElement('img');
+                     imgElement.src = link.imageDataUrl;
+                     imgElement.alt = link.name || 'Link Image';
+                     linkElement.appendChild(imgElement);
+                     linkElement.style.padding = '0'; // Remove padding para a imagem ocupar o botão
+                } else {
+                     // Adiciona ícone/emoji e texto para outros estilos
+                     if (link.icon) {
+                         // Verifica se é um ícone Font Awesome ou emoji
+                         if (link.icon.startsWith('fa')) {
+                             const iconSpan = document.createElement('span');
+                             iconSpan.className = link.icon + ' mr-2'; // Adiciona classe Font Awesome e margem
+                             linkElement.appendChild(iconSpan);
+                         } else {
+                             const iconSpan = document.createElement('span');
+                             iconSpan.textContent = link.icon + ' '; // Adiciona emoji e espaço
+                             linkElement.appendChild(iconSpan);
+                         }
+                     }
+                     const textSpan = document.createElement('span');
+                     textSpan.textContent = link.name || 'Link';
+                     linkElement.appendChild(textSpan);
+                }
+
+                previewLinksDiv.appendChild(linkElement);
+            });
+        }
+
+        // Função para renderizar a lista de links no painel de controle
+        function renderLinksList() {
+            linksListDiv.innerHTML = ''; // Limpa a lista atual
+            links.forEach((link, index) => {
+                const linkItem = document.createElement('div');
+                linkItem.classList.add('link-item');
+                linkItem.innerHTML = `
+                    <p class="font-semibold">${link.name || 'Novo Link'}</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 truncate">${link.url || 'Sem URL'}</p>
+                    <div class="mt-2 flex justify-end">
+                        <button class="edit-link" data-index="${index}">Editar</button>
+                        </div>
+                `;
+                linksListDiv.appendChild(linkItem);
+            });
+        }
+
+        // Função para abrir o modal de edição de link
+        function openLinkModal(index = -1) { // -1 para novo link
+            linkModal.classList.add('show');
+            modalLinkIndexInput.value = index; // Armazena o índice do link sendo editado
+
+            if (index > -1) { // Editando link existente
+                const link = links[index];
+                modalLinkNameInput.value = link.name || '';
+                modalLinkUrlInput.value = link.url || '';
+                modalLinkIconInput.value = link.icon || '';
+                modalLinkStyleSelect.value = link.style || 'solid';
+                modalGradientColor1Input.value = link.gradientColor1 || '#4f46e5';
+                modalGradientColor2Input.value = link.gradientColor2 || '#e879f9';
+                modalLinkImageDataUrlInput.value = link.imageDataUrl || '';
+
+                 // Mostra pré-visualização da imagem se existir
+                if (link.imageDataUrl) {
+                    modalLinkImagePreview.src = link.imageDataUrl;
+                    modalLinkImagePreview.classList.remove('hidden');
+                } else {
+                     modalLinkImagePreview.classList.add('hidden');
+                     modalLinkImagePreview.src = ''; // Limpa a src
+                }
+
+                // Mostra o botão de remover no modal apenas ao editar um link existente
+                removeLinkModalBtn.classList.remove('hidden');
+
+            } else { // Adicionando novo link
+                modalLinkNameInput.value = '';
+                modalLinkUrlInput.value = '';
+                modalLinkIconInput.value = '';
+                modalLinkStyleSelect.value = 'solid';
+                modalGradientColor1Input.value = '#4f46e5';
+                modalGradientColor2Input.value = '#e879f9';
+                modalLinkImageDataUrlInput.value = '';
+                modalLinkImagePreview.classList.add('hidden'); // Esconde pré-visualização da imagem
+                modalLinkImagePreview.src = ''; // Limpa a src
+                modalLinkImageInput.value = ''; // Limpa o input de arquivo
+
+                // Esconde o botão de remover no modal ao adicionar um novo link
+                removeLinkModalBtn.classList.add('hidden');
+            }
+
+             // Mostra/esconde opções de estilo de acordo com a seleção
+            toggleModalLinkStyleOptions();
+        }
+
+        // Função para fechar o modal de edição de link
+        function closeLinkModal() {
+            linkModal.classList.remove('show');
+        }
+
+        // Função para salvar o link do modal
+        function saveLink() {
+            const index = parseInt(modalLinkIndexInput.value);
+            const linkData = {
+                name: modalLinkNameInput.value,
+                url: modalLinkUrlInput.value,
+                icon: modalLinkIconInput.value,
+                style: modalLinkStyleSelect.value,
+                gradientColor1: modalGradientColor1Input.value,
+                gradientColor2: modalGradientColor2Input.value,
+                imageDataUrl: modalLinkImageDataUrlInput.value // Salva a Data URL da imagem
+            };
+
+            if (index > -1) {
+                // Editando link existente
+                links[index] = linkData;
+            } else {
+                // Adicionando novo link
+                links.push(linkData);
+            }
+
+            renderLinksList(); // Atualiza a lista no painel
+            updatePreview(); // Atualiza a pré-visualização
+            closeLinkModal(); // Fecha o modal
+        }
+
+        // Função para remover um link (agora chamada do modal)
+        function removeLink(index) {
+             // Não precisa de confirm() aqui, pois o botão está no modal de edição
+            links.splice(index, 1); // Remove o link do array
+            renderLinksList(); // Atualiza a lista no painel
+            updatePreview(); // Atualiza a pré-visualização
+            closeLinkModal(); // Fecha o modal após remover
+        }
+
+        // Função para alternar a visibilidade das opções de estilo no modal
+        function toggleModalLinkStyleOptions() {
+            const selectedStyle = modalLinkStyleSelect.value;
+            modalLinkGradientOptions.classList.add('hidden');
+            modalLinkImageOptions.classList.add('hidden');
+
+            if (selectedStyle === 'gradient') {
+                modalLinkGradientOptions.classList.remove('hidden');
+            } else if (selectedStyle === 'image') {
+                modalLinkImageOptions.classList.remove('hidden');
+            }
+        }
+
+        // Função para salvar a bio no localStorage
+        function saveBioToLocalStorage(storageKey) { // Agora aceita a chave como parâmetro
+            const bioData = {
+                username: usernameInput.value,
+                usernameColor: usernameColorInput.value, // Salva cor do username
+                bio: bioTextarea.value,
+                bioColor: bioColorInput.value, // Salva cor da bio
+                profileImageUrl: previewProfileImage.src.startsWith('data:') ? previewProfileImage.src : '', // Salva Data URL se for uma imagem carregada
+                backgroundType: document.querySelector('input[name="background-type"]:checked').value,
+                backgroundImageUrl: smartphoneFrame.dataset.backgroundImageUrl || '', // Salva Data URL da imagem de fundo (agora no frame)
+                gradientColor1: gradientColor1Input.value,
+                gradientColor2: gradientColor2Input.value,
+                textFont: textFontSelect.value,
+                darkMode: darkModeToggle.checked,
+                links: links
+            };
+            // Usa a chave fornecida (link personalizado)
+            localStorage.setItem(storageKey, JSON.stringify(bioData));
+            return storageKey;
+        }
+
+        // Função para carregar a bio do localStorage
+        function loadBioFromLocalStorage(storageKey) {
+            const bioData = localStorage.getItem(storageKey);
+            if (bioData) {
+                const data = JSON.parse(bioData);
+                usernameInput.value = data.username || '';
+                usernameColorInput.value = data.usernameColor || '#1f2937'; // Carrega cor do username
+                bioTextarea.value = data.bio || '';
+                bioColorInput.value = data.bioColor || '#4b5563'; // Carrega cor da bio
+
+                // Carrega imagem de perfil (se for Data URL)
+                if (data.profileImageUrl && data.profileImageUrl.startsWith('data:')) {
+                     previewProfileImage.src = data.profileImageUrl;
+                } else {
+                     previewProfileImage.src = 'https://placehold.co/96x96/cccccc/ffffff?text=Foto'; // Placeholder
+                }
+
+                // Carrega fundo
+                const backgroundTypeRadio = document.querySelector(`input[name="background-type"][value="${data.backgroundType || 'image'}"]`);
+                if (backgroundTypeRadio) {
+                    backgroundTypeRadio.checked = true;
+                    // Dispara evento change para atualizar a visibilidade das opções
+                    backgroundTypeRadio.dispatchEvent(new Event('change'));
+                }
+                 // Carrega imagem de fundo (se for Data URL)
+                if (data.backgroundImageUrl && data.backgroundImageUrl.startsWith('data:')) {
+                     smartphoneFrame.dataset.backgroundImageUrl = data.backgroundImageUrl; // Armazena no dataset para uso posterior
+                     smartphoneFrame.style.backgroundImage = `url(${data.backgroundImageUrl})`;
+                     smartphoneFrame.style.backgroundColor = '';
+                } else {
+                     smartphoneFrame.dataset.backgroundImageUrl = '';
+                     smartphoneFrame.style.backgroundImage = 'none';
+                }
+                gradientColor1Input.value = data.gradientColor1 || '#4f46e5';
+                gradientColor2Input.value = data.gradientColor2 || '#e879f9';
+
+                textFontSelect.value = data.textFont || 'Inter, sans-serif';
+
+                darkModeToggle.checked = data.darkMode || false;
+                // Dispara evento change para aplicar o modo escuro
+                darkModeToggle.dispatchEvent(new Event('change'));
+
+                links = data.links || [];
+                renderLinksList(); // Renderiza os links no painel
+                updatePreview(); // Atualiza a pré-visualização
+
+                // Define o valor do input de link personalizado ao carregar
+                customLinkInput.value = storageKey;
+
+
+                return true; // Indica que carregou com sucesso
+            }
+            return false; // Indica que não encontrou dados
+        }
+
+        // --- Event Listeners ---
+
+        // Atualiza pré-visualização ao digitar/mudar campos de texto e cor
+        usernameInput.addEventListener('input', updatePreview);
+        usernameColorInput.addEventListener('input', updatePreview);
+        bioTextarea.addEventListener('input', updatePreview);
+        bioColorInput.addEventListener('input', updatePreview);
+        textFontSelect.addEventListener('change', updatePreview);
+        gradientColor1Input.addEventListener('input', updatePreview);
+        gradientColor2Input.addEventListener('input', updatePreview);
+
+        // Atualiza pré-visualização da imagem de perfil
+        profileImageInput.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewProfileImage.src = e.target.result; // Define a Data URL como src
+                    updatePreview(); // Atualiza pré-visualização
+                }
+                reader.readAsDataURL(file); // Lê o arquivo como Data URL
+            } else {
+                 previewProfileImage.src = 'https://placehold.co/96x96/cccccc/ffffff?text=Foto'; // Volta para o placeholder se nenhum arquivo for selecionado
+                 updatePreview();
+            }
+        });
+
+         // Atualiza pré-visualização da imagem de fundo
+        backgroundImageInput.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    smartphoneFrame.dataset.backgroundImageUrl = e.target.result; // Armazena a Data URL no dataset do frame
+                    smartphoneFrame.style.backgroundImage = `url(${e.target.result})`; // Define a Data URL como background-image do frame
+                    smartphoneFrame.style.backgroundColor = ''; // Remove cor de fundo se houver
+                    updatePreview(); // Atualiza pré-visualização
+                }
+                reader.readAsDataURL(file); // Lê o arquivo como Data URL
+            } else {
+                smartphoneFrame.dataset.backgroundImageUrl = ''; // Limpa a Data URL do dataset
+                smartphoneFrame.style.backgroundImage = 'none'; // Remove a imagem de fundo
+                // Não chama updatePreview aqui, pois a mudança de tipo de fundo já fará isso
+            }
+        });
+
+        // Alterna opções de fundo (imagem vs gradiente)
+        backgroundTypeRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                if (this.value === 'image') {
+                    backgroundImageOptions.classList.remove('hidden');
+                    backgroundGradientOptions.classList.add('hidden');
+                } else {
+                    backgroundImageOptions.classList.add('hidden');
+                    backgroundGradientOptions.classList.remove('hidden');
+                }
+                updatePreview(); // Atualiza pré-visualização ao mudar o tipo de fundo
+            });
+        });
+
+         // Alterna Modo Escuro
+        darkModeToggle.addEventListener('change', function() {
+            document.body.classList.toggle('dark-mode', this.checked);
+             // Atualiza a cor do texto e fundo do preview para refletir o modo escuro
+             updatePreview(); // Chama updatePreview para garantir que o fundo do frame se ajuste
+        });
+
+        // Adicionar novo link (abre o modal)
+        addLinkBtn.addEventListener('click', () => openLinkModal());
+
+        // Event listener para cliques na lista de links (apenas para editar agora)
+        linksListDiv.addEventListener('click', function(event) {
+            if (event.target.classList.contains('edit-link')) {
+                const index = parseInt(event.target.dataset.index);
+                openLinkModal(index); // Abre modal para editar o link
+            }
+        });
+
+        // Fechar modal
+        closeModalBtn.addEventListener('click', closeLinkModal);
+        linkModal.addEventListener('click', function(event) {
+            if (event.target === linkModal) { // Fecha se clicar fora do conteúdo do modal
+                closeLinkModal();
+            }
+        });
+
+        // Salvar link do modal
+        saveLinkBtn.addEventListener('click', saveLink);
+
+        // Event listener para o novo botão Remover no modal
+        removeLinkModalBtn.addEventListener('click', function() {
+            const index = parseInt(modalLinkIndexInput.value);
+            if (index > -1) { // Garante que é um link existente
+                removeLink(index); // Chama a função de remover
+            }
+        });
+
+
+        // Alterna opções de estilo no modal
+        modalLinkStyleSelect.addEventListener('change', toggleModalLinkStyleOptions);
+
+         // Pré-visualização da imagem no modal de link
+        modalLinkImageInput.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    modalLinkImagePreview.src = e.target.result;
+                    modalLinkImageDataUrlInput.value = e.target.result; // Armazena a Data URL no input hidden
+                    modalLinkImagePreview.classList.remove('hidden');
+                }
+                reader.readAsDataURL(file);
+            } else {
+                modalLinkImagePreview.classList.add('hidden');
+                modalLinkImagePreview.src = '';
+                modalLinkImageDataUrlInput.value = ''; // Limpa a Data URL
+            }
+        });
+
+        // Gerar e Salvar Link
+        generateLinkBtn.addEventListener('click', function() {
+            const customLink = customLinkInput.value.trim(); // Pega o valor do input e remove espaços em branco
+            if (!customLink) {
+                alert("Por favor, digite um link personalizado.");
+                customLinkInput.focus(); // Foca no campo para o usuário preencher
+                return; // Sai da função se o campo estiver vazio
+            }
+
+            // Usa o link personalizado como a chave de armazenamento
+            const storageKey = customLink;
+            saveBioToLocalStorage(storageKey); // Passa a chave para a função de salvar
+
+            const baseUrl = window.location.origin + window.location.pathname; // Pega a URL base da página atual
+            const generatedUrl = `${baseUrl}#${storageKey}`; // Adiciona a chave (link personalizado) como hash
+            generatedLinkInput.value = generatedUrl;
+            generatedLinkArea.classList.remove('hidden');
+
+            // Explica ao usuário que o link funciona localmente
+            alert(`Bio salva no seu navegador com o link "${customLink}"! Use este link para carregar a bio localmente: ${generatedUrl}\n\nPara compartilhar com outras pessoas, você precisaria hospedar esta página e garantir que o script carregue a bio usando o hash da URL.`);
+        });
+
+        // Copiar Link Gerado
+        copyLinkBtn.addEventListener('click', function() {
+            generatedLinkInput.select(); // Seleciona o texto do input
+            generatedLinkInput.setSelectionRange(0, 99999); // Para dispositivos móveis
+            document.execCommand('copy'); // Copia o texto
+            alert('Link copiado para a área de transferência!');
+        });
+
+        // --- Inicialização ---
+
+        // Carrega a bio ao carregar a página (se houver um hash na URL)
+        window.onload = function() {
+            const hash = window.location.hash.substring(1); // Pega o hash sem o '#'
+            if (hash) {
+                loadBioFromLocalStorage(hash); // Usa o hash como a chave de armazenamento
+            } else {
+                 // Se não houver hash, carrega uma bio padrão ou vazia e atualiza a pré-visualização inicial
+                 updatePreview();
+                 renderLinksList(); // Renderiza a lista de links vazia inicialmente
+            }
+        };
+
+         // Garante que as opções de fundo corretas sejam exibidas na carga inicial
+        document.addEventListener('DOMContentLoaded', (event) => {
+             const selectedBackgroundType = document.querySelector('input[name="background-type"]:checked').value;
+             if (selectedBackgroundType === 'image') {
+                 backgroundImageOptions.classList.remove('hidden');
+                 backgroundGradientOptions.classList.add('hidden');
+             } else {
+                 backgroundImageOptions.classList.add('hidden');
+                 backgroundGradientOptions.classList.remove('hidden');
+             }
+        });
+    </script>
+</body>
+</html>
